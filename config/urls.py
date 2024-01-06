@@ -5,7 +5,16 @@ from django.urls import include, path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
+
+from cats import views
+from quickstart import views as v
+
+router = routers.DefaultRouter()
+router.register(r"users", v.UserViewSet)
+router.register(r"cats", views.CatViewSet)
+router.register(r"pairs", views.PairViewSet)
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
@@ -16,6 +25,8 @@ urlpatterns = [
     path("users/", include("experimenting.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
+    path("api", include(router.urls)),
+    path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # API URLS
@@ -57,3 +68,5 @@ if settings.DEBUG:
         import debug_toolbar
 
         urlpatterns = [path("__debug__/", include(debug_toolbar.urls))] + urlpatterns
+
+urlpatterns += router.urls
